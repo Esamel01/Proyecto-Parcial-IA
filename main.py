@@ -592,3 +592,8 @@ class BehaviorTree:
         if keys[K_RIGHT] or keys[K_d]: dx = 1
         if keys[K_UP] or keys[K_w]: dy = -1
         if keys[K_DOWN] or keys[K_s]: dy = 1
+
+                if keys[K_SPACE] and self.player.current_bullets > 0:
+            bullet = self.player.shoot()
+            if bullet:
+                self.bullets.append(bullet)
