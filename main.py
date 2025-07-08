@@ -542,3 +542,11 @@ class BehaviorTree:
         self.player.current_bullets = MAX_BULLETS
         self.level_complete = False
         self.game_over = False
+
+         border = 20
+        self.walls.append(Wall(0, 0, WIDTH, border))
+        self.walls.append(Wall(0, HEIGHT - border, WIDTH, border))
+        self.walls.append(Wall(0, 0, border, HEIGHT))
+        self.walls.append(Wall(WIDTH - border, 0, border, HEIGHT))
+
+        
