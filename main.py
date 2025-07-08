@@ -208,3 +208,14 @@ class EnemyBullet:
             dy = dy * PLAYER_SPEED
         else:
             return
+    
+    original_x = self.rect.x
+        self.rect.x += dx
+        for wall in walls:
+            if self.rect.colliderect(wall.rect):
+                if dx > 0:
+                    self.rect.right = wall.rect.left
+                elif dx < 0:
+                    self.rect.left = wall.rect.right
+                break
+        
