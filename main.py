@@ -714,3 +714,34 @@ class BehaviorTree:
 
         font = pygame.font.SysFont('Arial', 24)
         small_font = pygame.font.SysFont('Arial', 18)
+
+                health_width = 200
+        health_ratio = self.player.vida / self.player.vida_max
+        pygame.draw.rect(screen, (60, 0, 0), (10, 10, health_width, 25))
+        pygame.draw.rect(screen, (0, 180, 0), (10, 10, health_width * health_ratio, 25))
+        health_text = font.render(f"Health: {int(self.player.vida)}/{self.player.vida_max}", True, WHITE)
+        lives_text = font.render(f"Lives: {self.player.lives}", True, WHITE)
+
+        screen.blit(health_text, (health_width + 15, 10))
+        screen.blit(lives_text, (10, 40))
+
+        level_text = font.render(f"Level: {self.level}", True, YELLOW)
+        score_text = font.render(f"Score: {self.player.score}", True, WHITE)
+        bullets_text = font.render(f"Bullets: {self.player.current_bullets}/{MAX_BULLETS}", True, WHITE)
+
+        screen.blit(level_text, (10, 70))
+        screen.blit(score_text, (10, 100))
+        screen.blit(bullets_text, (WIDTH - 150, 10))
+
+        controls_text = small_font.render("WASD/Gamepad: Move | SPACE/A: Shoot | R/Select: Restart | N/Y: Next Level", True, (180, 180, 180))
+        screen.blit(controls_text, (WIDTH//2 - controls_text.get_width()//2, HEIGHT - 25))
+
+        if self.game_over:
+            self.draw_message("GAME OVER", RED, "Press R/Select to restart")
+        elif self.level_complete:
+            self.draw_message(f"Level {self.level} Complete!", GREEN, "Press N/Y for next level")
+
+def main():
+    game = Game()
+    running = True
+    
