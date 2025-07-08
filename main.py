@@ -580,3 +580,9 @@ class BehaviorTree:
                     self.enemies.append(Enemy(x, y, self.level))
                     valid = True
                 attempts += 1
+
+    def update(self, dt):
+        if self.game_over or self.level_complete or self.in_menu:
+            return
+
+        keys = pygame.key.get_pressed()
