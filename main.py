@@ -87,3 +87,16 @@ create_placeholder_image('assets/walls/wall_tile.png', (100, 100), DARK_GRAY)
 create_placeholder_image('assets/background/tiled_background.png', (WIDTH, HEIGHT), BLACK)
 create_placeholder_sound('assets/sounds/shoot.wav')
 create_placeholder_sound('assets/sounds/background_music.mp3')
+
+PLAYER_IMAGE = load_image('assets/player/player_ship.png', max_size=(64, 64))
+PLAYER_RADIUS = PLAYER_IMAGE.get_width() // 2
+
+ENEMY_IMAGE = load_image('assets/enemies/enemy_ship.png', max_size=(64, 64))
+ENEMY_RADIUS = ENEMY_IMAGE.get_width() // 2
+
+BULLET_IMAGE = load_image('assets/bullets/player_bullet.png', target_size=(16, 16))
+ENEMY_BULLET_IMAGE = load_image('assets/bullets/enemy_bullet.png', target_size=(16, 16))
+WALL_IMAGE = load_image('assets/walls/wall_tile.png', max_size=(100, 100))
+BACKGROUND_IMAGE = load_image('assets/background/tiled_background.png', target_size=(WIDTH, HEIGHT))
+SHOOT_SOUND = load_sound('assets/sounds/shoot.wav')
+BACKGROUND_MUSIC = 'assets/sounds/background_music.mp3'
