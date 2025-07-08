@@ -645,3 +645,5 @@ class BehaviorTree:
         for i in sorted(enemy_bullets_to_remove, reverse=True):
             if i < len(self.enemy_bullets):
                 self.enemy_bullets.pop(i)
+
+                self.player.update(dt)
