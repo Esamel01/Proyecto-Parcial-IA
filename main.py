@@ -195,3 +195,16 @@ class EnemyBullet:
         screen.blit(rotated_image, new_rect.topleft)
 
     def move(self, dx, dy, walls, enemies):
+
+         if abs(dx) > 1 or abs(dy) > 1:
+            mag = math.hypot(dx, dy)
+            if mag > 0:
+                dx = dx / mag
+                dy = dy / mag
+        
+        if dx != 0 or dy != 0:
+            self.direction = [dx, dy]
+            dx = dx * PLAYER_SPEED
+            dy = dy * PLAYER_SPEED
+        else:
+            return
