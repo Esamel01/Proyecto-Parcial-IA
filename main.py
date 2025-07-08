@@ -600,3 +600,22 @@ class BehaviorTree:
 
                       if dx != 0 or dy != 0:
             self.player.move(dx, dy, self.walls, self.enemies)
+        
+                bullets_to_remove = []
+        for i, bullet in enumerate(self.bullets):
+            if not bullet.update(self.walls):
+                bullets_to_remove.append(i)
+                continue
+
+            for j, enemy in enumerate(self.enemies):
+                if bullet.rect.colliderect(enemy.rect):
+                    bullets_to_remove.append(i)
+                    enemy.vida -= 10
+                    if enemy.vida <= 0:
+                        self.enemies.pop(j)
+                        self.player.score += 50 * self.level
+                    break
+
+        for i in sorted(bullets_to_remove, reverse=True):
+            if i < len(self.bullets):
+                self.bullets.pop(i)
