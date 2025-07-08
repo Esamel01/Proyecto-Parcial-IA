@@ -509,3 +509,36 @@ class BehaviorTree:
                         break
             
             return True
+        
+        class Game:
+    def __init__(self):
+        self.reset_game()
+        
+        try:
+            pygame.mixer.music.load(BACKGROUND_MUSIC)
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play(-1)
+        except:
+            print("No se pudo cargar la música de fondo")
+    
+    def reset_game(self):
+        self.player = Player()
+        self.walls = []
+        self.enemies = []
+        self.bullets = []
+        self.enemy_bullets = []
+        self.level = 1
+        self.game_over = False
+        self.level_complete = False
+        self.in_menu = True
+        self.generate_level()
+
+    def generate_level(self):
+        self.walls.clear()
+        self.enemies.clear()
+        self.bullets.clear()
+        self.enemy_bullets.clear()
+        self.player.reset_position()
+        self.player.current_bullets = MAX_BULLETS
+        self.level_complete = False
+        self.game_over = False
