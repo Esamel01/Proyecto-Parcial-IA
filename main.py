@@ -13,3 +13,15 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Roguelike - Directional Shooting")
 clock = pygame.time.Clock()
 FPS = 60
+
+PLAYER_SPEED = 4
+BULLET_SPEED = 8
+ENEMY_BULLET_SPEED = 5
+PLAYER_LIVES = 3
+PLAYER_HP = 100
+MAX_BULLETS = 100
+SHOOT_DELAY = 150
+ENEMY_SHOOT_DELAY = 1000
+DAMAGE_PER_SECOND = 10
+ENEMY_BULLET_DAMAGE = 10
+GRID_CELL_SIZE = 30
