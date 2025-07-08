@@ -619,3 +619,15 @@ class BehaviorTree:
         for i in sorted(bullets_to_remove, reverse=True):
             if i < len(self.bullets):
                 self.bullets.pop(i)
+
+                  player_is_colliding = False
+        new_enemy_bullets = []
+        for enemy in self.enemies:
+            contact, bullet = enemy.update(self.player, self.walls, self.enemies, dt, self)
+            if contact:
+                player_is_colliding = True
+            if bullet:
+                new_enemy_bullets.append(bullet)
+        
+        self.enemy_bullets.extend(new_enemy_bullets)
+        self.player.set_taking_damage(player_is_colliding)
