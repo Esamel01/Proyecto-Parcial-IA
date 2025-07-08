@@ -711,3 +711,6 @@ class BehaviorTree:
             enemy_bullet.draw()
 
         self.player.draw()
+
+        font = pygame.font.SysFont('Arial', 24)
+        small_font = pygame.font.SysFont('Arial', 18)
