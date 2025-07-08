@@ -549,4 +549,19 @@ class BehaviorTree:
         self.walls.append(Wall(0, 0, border, HEIGHT))
         self.walls.append(Wall(WIDTH - border, 0, border, HEIGHT))
 
-        
+                for _ in range(10 + self.level * 2):
+            valid = False
+            attempts = 0
+            while not valid and attempts < 100:
+                x = random.randint(border, WIDTH - border - 50)
+                y = random.randint(border, HEIGHT - border - 50)
+                w = random.randint(20, 70)
+                h = random.randint(20, 70)
+                new_wall = Wall(x, y, w, h)
+                
+                dist_to_player = math.hypot(new_wall.rect.centerx - WIDTH//2, new_wall.rect.centery - HEIGHT//2)
+                if dist_to_player > 150 and not any(new_wall.rect.colliderect(w.rect) for w in self.walls):
+                    self.walls.append(new_wall)
+                    valid = True
+                attempts += 1
+  
