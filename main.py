@@ -315,3 +315,19 @@ class Enemy:
         rotated_image = self.get_rotated_image(player)
         new_rect = rotated_image.get_rect(center=self.rect.center)
         screen.blit(rotated_image, new_rect.topleft)
+
+                life_ratio = self.vida / (25 + self.level * 5)
+        bar_width = 30
+        pygame.draw.rect(screen, (30, 30, 30), (new_rect.centerx - bar_width//2, new_rect.top - 10, bar_width, 5))
+        pygame.draw.rect(screen, (0, 180, 0), (new_rect.centerx - bar_width//2, new_rect.top - 10, int(bar_width * life_ratio), 5))
+
+    def update(self, player, walls, enemies_list, dt, game):
+        generated_bullet = None
+        self.behavior_tree.run(self, game)
+        
+        self.rect.left = max(0, self.rect.left)
+        self.rect.right = min(WIDTH, self.rect.right)
+        self.rect.top = max(0, self.rect.top)
+        self.rect.bottom = min(HEIGHT, self.rect.bottom)
+        
+        return self.rect.colliderect(player.rect), generated_bullet
