@@ -586,3 +586,9 @@ class BehaviorTree:
             return
 
         keys = pygame.key.get_pressed()
+
+                dx = dy = 0
+        if keys[K_LEFT] or keys[K_a]: dx = -1
+        if keys[K_RIGHT] or keys[K_d]: dx = 1
+        if keys[K_UP] or keys[K_w]: dy = -1
+        if keys[K_DOWN] or keys[K_s]: dy = 1
