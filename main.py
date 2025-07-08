@@ -331,3 +331,181 @@ class Enemy:
         self.rect.bottom = min(HEIGHT, self.rect.bottom)
         
         return self.rect.colliderect(player.rect), generated_bullet
+    
+    class AStarNode:
+    def __init__(self, position, parent=None):
+        self.position = position
+        self.parent = parent
+        self.g = 0
+        self.h = 0
+        self.f = 0
+    
+    def __eq__(self, other):
+        return self.position == other.position
+    
+    def __lt__(self, other):
+        return self.f < other.f
+
+class AStarPathfinding:
+    @staticmethod
+    def heuristic(a, b):
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    
+    @staticmethod
+    def find_path(start, end, walls):
+        grid_width = WIDTH // GRID_CELL_SIZE
+        grid_height = HEIGHT // GRID_CELL_SIZE
+        
+        open_set = []
+        closed_set = set()
+        
+        start_node = AStarNode(start)
+        end_node = AStarNode(end)
+        
+        heapq.heappush(open_set, (start_node.f, start_node))
+        
+        while open_set:
+            current_node = heapq.heappop(open_set)[1]
+            closed_set.add(current_node.position)
+            
+            if current_node == end_node:
+                path = []
+                while current_node:
+                    path.append(current_node.position)
+                    current_node = current_node.parent
+                return path[::-1]
+            
+            for dx, dy in [(0,1),(1,0),(0,-1),(-1,0),(1,1),(-1,1),(1,-1),(-1,-1)]:
+                neighbor_pos = (current_node.position[0]+dx, current_node.position[1]+dy)
+                
+                if 0 <= neighbor_pos[0] < grid_width and 0 <= neighbor_pos[1] < grid_height:
+                    cell_rect = pygame.Rect(
+                        neighbor_pos[0]*GRID_CELL_SIZE, 
+                        neighbor_pos[1]*GRID_CELL_SIZE, 
+                        GRID_CELL_SIZE, 
+                        GRID_CELL_SIZE
+                    )
+                    
+                    walkable = True
+                    for wall in walls:
+                        if cell_rect.colliderect(wall.rect):
+                            walkable = False
+                            break
+                    
+                    if walkable:
+                        neighbor = AStarNode(neighbor_pos, current_node)
+                        if neighbor.position in closed_set:
+                            continue
+                            
+                        neighbor.g = current_node.g + 1
+                        neighbor.h = AStarPathfinding.heuristic(neighbor.position, end_node.position)
+                        neighbor.f = neighbor.g + neighbor.h
+                        
+                        if not any(node[1] == neighbor and node[0] <= neighbor.f for node in open_set):
+                            heapq.heappush(open_set, (neighbor.f, neighbor))
+        
+        return None
+
+class BehaviorTree:
+    class Node:
+        def run(self, enemy, game):
+            return False
+    
+    class Selector(Node):
+        def __init__(self, children):
+            self.children = children
+        
+        def run(self, enemy, game):
+            for child in self.children:
+                if child.run(enemy, game):
+                    return True
+            return False
+    
+    class Sequence(Node):
+        def __init__(self, children):
+            self.children = children
+        
+        def run(self, enemy, game):
+            for child in self.children:
+                if not child.run(enemy, game):
+                    return False
+            return True
+    
+    class CanShootPlayer(Node):
+        def run(self, enemy, game):
+            dx = game.player.rect.centerx - enemy.rect.centerx
+            dy = game.player.rect.centery - enemy.rect.centery
+            dist = math.hypot(dx, dy)
+            return dist < 300 and pygame.time.get_ticks() - enemy.last_shot >= ENEMY_SHOOT_DELAY
+    
+    class ShootAction(Node):
+        def run(self, enemy, game):
+            dx = game.player.rect.centerx - enemy.rect.centerx
+            dy = game.player.rect.centery - enemy.rect.centery
+            dist = math.hypot(dx, dy)
+            
+            if dist > 0:
+                bullet_dx = dx/dist * ENEMY_BULLET_SPEED
+                bullet_dy = dy/dist * ENEMY_BULLET_SPEED
+            else:
+                bullet_dx, bullet_dy = 0, -ENEMY_BULLET_SPEED
+            
+            game.enemy_bullets.append(EnemyBullet(enemy.rect.centerx, enemy.rect.centery, bullet_dx, bullet_dy))
+            enemy.last_shot = pygame.time.get_ticks()
+            return True
+    
+    class PathfindToPlayer(Node):
+        def run(self, enemy, game):
+            if pygame.time.get_ticks() - enemy.last_path_update < 1000:
+                return True
+                
+            enemy.last_path_update = pygame.time.get_ticks()
+            start = (int(enemy.rect.centerx/GRID_CELL_SIZE), int(enemy.rect.centery/GRID_CELL_SIZE))
+            end = (int(game.player.rect.centerx/GRID_CELL_SIZE), int(game.player.rect.centery/GRID_CELL_SIZE))
+            
+            path = AStarPathfinding.find_path(start, end, game.walls)
+            if path and len(path) > 1:
+                enemy.current_path = path[1:]
+            return True
+    
+    class FollowPath(Node):
+        def run(self, enemy, game):
+            if not enemy.current_path:
+                return False
+                
+            next_node = enemy.current_path[0]
+            target_x = next_node[0]*GRID_CELL_SIZE + GRID_CELL_SIZE//2
+            target_y = next_node[1]*GRID_CELL_SIZE + GRID_CELL_SIZE//2
+            
+            dx = target_x - enemy.rect.centerx
+            dy = target_y - enemy.rect.centery
+            dist = math.hypot(dx, dy)
+            
+            if dist < 5:
+                enemy.current_path.pop(0)
+                if not enemy.current_path:
+                    return False
+                next_node = enemy.current_path[0]
+                dx = next_node[0]*GRID_CELL_SIZE + GRID_CELL_SIZE//2 - enemy.rect.centerx
+                dy = next_node[1]*GRID_CELL_SIZE + GRID_CELL_SIZE//2 - enemy.rect.centery
+                dist = math.hypot(dx, dy)
+            
+            if dist > 0:
+                dx = dx/dist * enemy.speed
+                dy = dy/dist * enemy.speed
+                
+                original_x = enemy.rect.x
+                enemy.rect.x += dx
+                for wall in game.walls:
+                    if enemy.rect.colliderect(wall.rect):
+                        enemy.rect.x = original_x
+                        break
+                
+                original_y = enemy.rect.y
+                enemy.rect.y += dy
+                for wall in game.walls:
+                    if enemy.rect.colliderect(wall.rect):
+                        enemy.rect.y = original_y
+                        break
+            
+            return True
