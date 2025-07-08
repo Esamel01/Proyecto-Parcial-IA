@@ -165,3 +165,33 @@ class EnemyBullet:
             not any(self.rect.colliderect(wall.rect) for wall in walls)):
             return True
         return False
+    
+    class Player:
+    def __init__(self):
+        self.image = PLAYER_IMAGE
+        self.radius = PLAYER_RADIUS
+        self.reset_position()
+        self.lives = PLAYER_LIVES
+        self.vida = PLAYER_HP
+        self.vida_max = PLAYER_HP
+        self.last_shot = 0
+        self.direction = [0, -1]
+        self.score = 0
+        self.current_bullets = MAX_BULLETS
+        self.is_taking_damage = False
+
+    def reset_position(self):
+        self.x = WIDTH // 2
+        self.y = HEIGHT // 2
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
+    def get_rotated_image(self):
+        angle = math.degrees(math.atan2(-self.direction[1], self.direction[0])) - 90
+        return pygame.transform.rotozoom(self.image, angle, 1)
+
+    def draw(self):
+        rotated_image = self.get_rotated_image()
+        new_rect = rotated_image.get_rect(center=self.rect.center)
+        screen.blit(rotated_image, new_rect.topleft)
+
+    def move(self, dx, dy, walls, enemies):
