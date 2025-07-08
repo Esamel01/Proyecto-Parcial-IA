@@ -597,3 +597,6 @@ class BehaviorTree:
             bullet = self.player.shoot()
             if bullet:
                 self.bullets.append(bullet)
+
+                      if dx != 0 or dy != 0:
+            self.player.move(dx, dy, self.walls, self.enemies)
