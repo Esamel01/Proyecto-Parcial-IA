@@ -64,7 +64,7 @@ def load_sound(filepath):
         print(f"Error loading sound {filepath}: {e}")
         return None
     
-    for folder in ['player', 'enemies', 'bullets', 'walls', 'background', 'sounds']:
+for folder in ['player', 'enemies', 'bullets', 'walls', 'background', 'sounds']:
     if not os.path.exists(f'assets/{folder}'):
         os.makedirs(f'assets/{folder}')
 
@@ -100,3 +100,68 @@ WALL_IMAGE = load_image('assets/walls/wall_tile.png', max_size=(100, 100))
 BACKGROUND_IMAGE = load_image('assets/background/tiled_background.png', target_size=(WIDTH, HEIGHT))
 SHOOT_SOUND = load_sound('assets/sounds/shoot.wav')
 BACKGROUND_MUSIC = 'assets/sounds/background_music.mp3'
+
+class Wall:
+    def __init__(self, x, y, width, height):
+        self.image = pygame.transform.smoothscale(WALL_IMAGE, (width, height))
+        self.rect = self.image.get_rect(topleft=(x, y))
+
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+class Bullet:
+    def __init__(self, x, y, dx, dy, image):
+        self.image = image
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.radius = image.get_width() // 2
+        self.rect = self.image.get_rect(center=(x, y))
+
+    def get_rotated_image(self):
+        angle = math.degrees(math.atan2(-self.dy, self.dx)) - 90
+        return pygame.transform.rotozoom(self.image, angle, 1)
+
+    def draw(self):
+        rotated_image = self.get_rotated_image()
+        screen.blit(rotated_image, self.rect)
+
+    def update(self, walls):
+        self.x += self.dx
+        self.y += self.dy
+        self.rect.center = (int(self.x), int(self.y))
+
+        if (0 <= self.x < WIDTH and 0 <= self.y < HEIGHT and
+            not any(self.rect.colliderect(wall.rect) for wall in walls)):
+            return True
+        return False
+
+class EnemyBullet:
+    def __init__(self, x, y, dx, dy):
+        self.image = ENEMY_BULLET_IMAGE
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.radius = self.image.get_width() // 2
+        self.rect = self.image.get_rect(center=(x, y))
+        self.damage = ENEMY_BULLET_DAMAGE
+
+    def get_rotated_image(self):
+        angle = math.degrees(math.atan2(-self.dy, self.dx)) - 90
+        return pygame.transform.rotozoom(self.image, angle, 1)
+
+    def draw(self):
+        rotated_image = self.get_rotated_image()
+        screen.blit(rotated_image, self.rect)
+
+    def update(self, walls):
+        self.x += self.dx
+        self.y += self.dy
+        self.rect.center = (int(self.x), int(self.y))
+
+        if (0 <= self.x < WIDTH and 0 <= self.y < HEIGHT and
+            not any(self.rect.colliderect(wall.rect) for wall in walls)):
+            return True
+        return False
