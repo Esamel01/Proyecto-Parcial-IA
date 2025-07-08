@@ -564,4 +564,19 @@ class BehaviorTree:
                     self.walls.append(new_wall)
                     valid = True
                 attempts += 1
-  
+
+                        num_enemies = 3 + self.level * 2
+        for _ in range(num_enemies):
+            valid = False
+            attempts = 0
+            while not valid and attempts < 100:
+                x = random.randint(border + ENEMY_RADIUS, WIDTH - border - ENEMY_RADIUS)
+                y = random.randint(border + ENEMY_RADIUS, HEIGHT - border - ENEMY_RADIUS)
+                enemy_rect = pygame.Rect(x - ENEMY_RADIUS, y - ENEMY_RADIUS, ENEMY_RADIUS*2, ENEMY_RADIUS*2)
+                dist_to_player = math.hypot(x - WIDTH//2, y - HEIGHT//2)
+                
+                if (dist_to_player > 150 and
+                    not any(enemy_rect.colliderect(w.rect) for w in self.walls)):
+                    self.enemies.append(Enemy(x, y, self.level))
+                    valid = True
+                attempts += 1
