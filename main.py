@@ -647,3 +647,67 @@ class BehaviorTree:
                 self.enemy_bullets.pop(i)
 
                 self.player.update(dt)
+
+                        if len(self.enemies) == 0:
+            self.level_complete = True
+        
+        if self.player.lives <= 0 and self.player.vida <= 0:
+            self.game_over = True
+
+    def draw_message(self, title, color, subtitle):
+        s = pygame.Surface((500, 150), pygame.SRCALPHA)
+        s.fill((0, 0, 0, 200))
+        screen.blit(s, (WIDTH//2 - 250, HEIGHT//2 - 75))
+
+        title_font = pygame.font.SysFont('Arial', 48, bold=True)
+        subtitle_font = pygame.font.SysFont('Arial', 24)
+
+        title_text = title_font.render(title, True, color)
+        subtitle_text = subtitle_font.render(subtitle, True, WHITE)
+
+        screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, HEIGHT//2 - 50))
+        screen.blit(subtitle_text, (WIDTH//2 - subtitle_text.get_width()//2, HEIGHT//2 + 20))
+
+    def draw_menu(self):
+        screen.blit(BACKGROUND_IMAGE, (0, 0))
+        
+        s = pygame.Surface((500, 300), pygame.SRCALPHA)
+        s.fill((0, 0, 0, 200))
+        screen.blit(s, (WIDTH//2 - 250, HEIGHT//2 - 150))
+        
+        title_font = pygame.font.SysFont('Arial', 64, bold=True)
+        menu_font = pygame.font.SysFont('Arial', 36)
+        controls_font = pygame.font.SysFont('Arial', 24)
+        
+        title_text = title_font.render("Roguelike Shooter", True, BLUE)
+        start_text = menu_font.render("1. Iniciar Juego", True, WHITE)
+        exit_text = menu_font.render("2. Salir", True, WHITE)
+        controls_text = controls_font.render("Controles: WASD/Gamepad para mover, ESPACIO/A para disparar", True, (180, 180, 180))
+        gamepad_text = controls_font.render("Gamepad: Start para salir, Select/Y para reiniciar/siguiente nivel", True, (180, 180, 180))
+        
+        screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, HEIGHT//2 - 120))
+        screen.blit(start_text, (WIDTH//2 - start_text.get_width()//2, HEIGHT//2 - 20))
+        screen.blit(exit_text, (WIDTH//2 - exit_text.get_width()//2, HEIGHT//2 + 30))
+        screen.blit(controls_text, (WIDTH//2 - controls_text.get_width()//2, HEIGHT//2 + 100))
+        screen.blit(gamepad_text, (WIDTH//2 - gamepad_text.get_width()//2, HEIGHT//2 + 140))
+
+    def draw(self):
+        if self.in_menu:
+            self.draw_menu()
+            return
+
+        screen.blit(BACKGROUND_IMAGE, (0, 0))
+
+        for wall in self.walls:
+            wall.draw()
+
+        for enemy in self.enemies:
+            enemy.draw(self.player)
+
+        for bullet in self.bullets:
+            bullet.draw()
+        
+        for enemy_bullet in self.enemy_bullets:
+            enemy_bullet.draw()
+
+        self.player.draw()
