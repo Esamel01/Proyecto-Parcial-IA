@@ -63,3 +63,27 @@ def load_sound(filepath):
     except pygame.error as e:
         print(f"Error loading sound {filepath}: {e}")
         return None
+    
+    for folder in ['player', 'enemies', 'bullets', 'walls', 'background', 'sounds']:
+    if not os.path.exists(f'assets/{folder}'):
+        os.makedirs(f'assets/{folder}')
+
+def create_placeholder_image(path, size, color):
+    if not os.path.exists(path):
+        surface = pygame.Surface(size, pygame.SRCALPHA)
+        pygame.draw.rect(surface, color, (0, 0, size[0], size[1]))
+        pygame.image.save(surface, path)
+
+def create_placeholder_sound(path):
+    if not os.path.exists(path):
+        sound = pygame.mixer.Sound(buffer=bytearray([128]*8000))
+        pygame.mixer.Sound.save(sound, path)
+
+create_placeholder_image('assets/player/player_ship.png', (64, 64), BLUE)
+create_placeholder_image('assets/enemies/enemy_ship.png', (64, 64), RED)
+create_placeholder_image('assets/bullets/player_bullet.png', (16, 16), GREEN)
+create_placeholder_image('assets/bullets/enemy_bullet.png', (16, 16), (255, 100, 100))
+create_placeholder_image('assets/walls/wall_tile.png', (100, 100), DARK_GRAY)
+create_placeholder_image('assets/background/tiled_background.png', (WIDTH, HEIGHT), BLACK)
+create_placeholder_sound('assets/sounds/shoot.wav')
+create_placeholder_sound('assets/sounds/background_music.mp3')
