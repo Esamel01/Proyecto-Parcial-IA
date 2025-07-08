@@ -218,4 +218,13 @@ class EnemyBullet:
                 elif dx < 0:
                     self.rect.left = wall.rect.right
                 break
-        
+
+            original_y = self.rect.y
+        self.rect.y += dy
+        for wall in walls:
+            if self.rect.colliderect(wall.rect):
+                if dy > 0:
+                    self.rect.bottom = wall.rect.top
+                elif dy < 0:
+                    self.rect.top = wall.rect.bottom
+                break
