@@ -167,8 +167,8 @@ class EnemyBullet:
         return False
     
     class Player:
-    def __init__(self):
-        self.image = PLAYER_IMAGE
+        def __init__(self):
+         self.image = PLAYER_IMAGE
         self.radius = PLAYER_RADIUS
         self.reset_position()
         self.lives = PLAYER_LIVES
@@ -180,7 +180,7 @@ class EnemyBullet:
         self.current_bullets = MAX_BULLETS
         self.is_taking_damage = False
 
-    def reset_position(self):
+        def reset_position(self):
         self.x = WIDTH // 2
         self.y = HEIGHT // 2
         self.rect = self.image.get_rect(center=(self.x, self.y))
@@ -196,7 +196,7 @@ class EnemyBullet:
 
     def move(self, dx, dy, walls, enemies):
 
-         if abs(dx) > 1 or abs(dy) > 1:
+        if abs(dx) > 1 or abs(dy) > 1:
             mag = math.hypot(dx, dy)
             if mag > 0:
                 dx = dx / mag
@@ -208,8 +208,8 @@ class EnemyBullet:
             dy = dy * PLAYER_SPEED
         else:
             return
-    
-    original_x = self.rect.x
+
+        original_x = self.rect.x
         self.rect.x += dx
         for wall in walls:
             if self.rect.colliderect(wall.rect):
@@ -218,8 +218,8 @@ class EnemyBullet:
                 elif dx < 0:
                     self.rect.left = wall.rect.right
                 break
-
-            original_y = self.rect.y
+        
+        original_y = self.rect.y
         self.rect.y += dy
         for wall in walls:
             if self.rect.colliderect(wall.rect):
@@ -228,3 +228,90 @@ class EnemyBullet:
                 elif dy < 0:
                     self.rect.top = wall.rect.bottom
                 break
+
+                    self.rect.left = max(0, self.rect.left)
+        self.rect.right = min(WIDTH, self.rect.right)
+        self.rect.top = max(0, self.rect.top)
+        self.rect.bottom = min(HEIGHT, self.rect.bottom)
+
+    def can_shoot(self):
+        return pygame.time.get_ticks() - self.last_shot >= SHOOT_DELAY and self.current_bullets > 0
+
+    def shoot(self):
+        if self.can_shoot():
+            self.last_shot = pygame.time.get_ticks()
+            self.current_bullets -= 1
+            norm = math.hypot(*self.direction)
+            if norm > 0:
+                dx = self.direction[0] / norm * BULLET_SPEED
+                dy = self.direction[1] / norm * BULLET_SPEED
+            else:
+                dx, dy = 0, -BULLET_SPEED
+            
+            if SHOOT_SOUND:
+                SHOOT_SOUND.play()
+                
+            return Bullet(self.rect.centerx, self.rect.centery, dx, dy, BULLET_IMAGE)
+        return None
+
+    def update(self, dt):
+        if self.is_taking_damage:
+            self.vida -= DAMAGE_PER_SECOND * (dt / 1000)
+            if self.vida <= 0:
+                self.lives -= 1
+                if self.lives > 0:
+                    self.vida = self.vida_max
+                    self.reset_position()
+                else:
+                    self.vida = 0
+
+    def take_damage(self, amount):
+        self.vida -= amount
+        if self.vida <= 0:
+            self.lives -= 1
+            if self.lives > 0:
+                self.vida = self.vida_max
+                self.reset_position()
+            else:
+                self.vida = 0
+
+    def set_taking_damage(self, status):
+        self.is_taking_damage = status
+
+class Enemy:
+    def __init__(self, x, y, level):
+        self.x = x
+        self.y = y
+        self.level = level
+        self.vida = 25 + level * 5
+        self.speed = 1.3 + level * 0.1
+        self.image = ENEMY_IMAGE
+        self.radius = ENEMY_RADIUS
+        self.rect = self.image.get_rect(center=(x, y))
+        self.last_shot = pygame.time.get_ticks()
+        self.last_path_update = 0
+        self.current_path = []
+        self.behavior_tree = self.create_behavior_tree()
+
+    def create_behavior_tree(self):
+        return BehaviorTree.Selector([
+            BehaviorTree.Sequence([
+                BehaviorTree.CanShootPlayer(),
+                BehaviorTree.ShootAction()
+            ]),
+            BehaviorTree.Sequence([
+                BehaviorTree.PathfindToPlayer(),
+                BehaviorTree.FollowPath()
+            ])
+        ])
+
+    def get_rotated_image(self, player):
+        dx = player.rect.centerx - self.rect.centerx
+        dy = player.rect.centery - self.rect.centery
+        angle = math.degrees(math.atan2(-dy, dx)) - 90
+        return pygame.transform.rotozoom(self.image, angle, 1)
+
+    def draw(self, player):
+        rotated_image = self.get_rotated_image(player)
+        new_rect = rotated_image.get_rect(center=self.rect.center)
+        screen.blit(rotated_image, new_rect.topleft)
